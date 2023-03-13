@@ -91,8 +91,6 @@ searchButton.addEventListener("click", function (event) {
   getWeatherData(searchCity);
   searches.unshift({ city: searchCity });
   localStorage.setItem("search", JSON.stringify(searches));
-  renderSearches();
-  appendHistory(searchCity);
 });
 
 // function to display current weather at all times
@@ -122,4 +120,3 @@ function displayCurrentWeather(defaultCity, defaultWeather) {
 
 displayCurrentWeather();
 searchButton.addEventListener("click", displayWeather);
-retrieveHistory();

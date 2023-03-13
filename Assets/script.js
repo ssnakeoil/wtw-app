@@ -27,6 +27,39 @@ function getWeatherData(city) {
     });
 }
 
+function renderSearches() {
+  var searchHistoryItem = localStorage.getItem("search");
+  if (searchHistoryItem) {
+    // if there is a search history item in local storage, parse and store in searches array
+    searches = JSON.parse(searchHistoryItem);
+  }
+  searchHistoryContainer.innerHTML = "";
+  for (var i = 0; i < searches.length; i++) {
+    var search = searches[i];
+    var li = document.createElement("li");
+    li.textContent = search.city;
+    searchHistoryContainer.appendChild(li);
+  }
+}
+
+function appendHistory(searched) {
+  if (searches.indexOf(searched) !== -1) {
+    return
+  } else {
+    searches.push(searched);
+  }
+  localStorage.setItem("search", JSON.stringify(searches));
+  renderSearches();
+}
+
+function retrieveHistory() {
+  var storedSearches = localStorage.getItem("search");
+  if (storedSearches) {
+    searches = JSON.parse(storedSearches);
+  }
+  renderSearches();
+}
+
 // function to display weather data of searched city
 function displayWeather(weather, searchCity) {
   // clear old content
@@ -51,18 +84,21 @@ function displayWeather(weather, searchCity) {
   forecastContainer.appendChild(windSpeed);
 }
 
+// search will get data from API and be saved to local storage
 searchButton.addEventListener("click", function (event) {
   event.preventDefault();
   var searchCity = searchInput.value;
   getWeatherData(searchCity);
   searches.unshift({ city: searchCity });
   localStorage.setItem("search", JSON.stringify(searches));
+  renderSearches();
+  appendHistory(searchCity);
 });
 
 // function to display current weather at all times
-function displayCurrentWeather(city, weather) {
-  var city = "New York";
-  getWeatherData(city);
+function displayCurrentWeather(defaultCity, defaultWeather) {
+  var defaultCity = "New York";
+  var defaultWeather = getWeatherData(defaultCity);
 
   var currentWeather = document.createElement("div");
   currentWeatherContainer.appendChild(currentWeather);
@@ -72,20 +108,18 @@ function displayCurrentWeather(city, weather) {
   currentWeather.appendChild(currentCity);
 
   var currentTemperature = document.createElement("p");
-  currentTemperature.textContent = "Temperature: " + weather.main.temp + "°F";
+  currentTemperature.textContent = "Temperature: " + defaultWeather.main.temp + "°F";
   currentWeather.appendChild(currentTemperature);
 
   var currentHumidity = document.createElement("p");
-  currentHumidity.textContent = "Humidity: " + weather.main.humidity + "%";
+  currentHumidity.textContent = "Humidity: " + defaultWeather.main.humidity + "%";
   currentWeather.appendChild(currentHumidity);
 
   var currentWindSpeed = document.createElement("p");
-  currentWindSpeed.textContent = "Wind Speed: " + weather.wind.speed + " MPH";
+  currentWindSpeed.textContent = "Wind Speed: " + defaultWeather.wind.speed + " MPH";
   currentWeather.appendChild(currentWindSpeed);
-
-  var currentUvIndex = document.createElement("p");
-  currentUvIndex.textContent = "UV Index: ";
-  currentWeather.appendChild(currentUvIndex);
 }
 
 displayCurrentWeather();
+searchButton.addEventListener("click", displayWeather);
+retrieveHistory();
